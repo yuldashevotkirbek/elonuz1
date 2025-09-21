@@ -1,6 +1,14 @@
-# tekshiruvchi
+# TEKSHIRUVCHI
 
-A new Flutter project.
+Sog'lom odatlar: ekran vaqti, masofa, uyqu hisobi va tavsiyalar.
+
+## Features
+
+- Real screen-time (UsageStats)
+- Distance tracking (Geolocator)
+- Sleep estimation (usage events)
+- Tips, weekly charts, notifications
+- Material 3, dark mode, dynamic color
 
 ## Getting Started
 
