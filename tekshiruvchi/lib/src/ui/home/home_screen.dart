@@ -3,6 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers.dart';
 import '../tips/tips_screen.dart';
+import '../weekly/weekly_screen.dart';
+import '../settings/settings_screen.dart';
+import '../../services/history_service.dart';
+import 'widgets/progress_ring.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -65,7 +69,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: _refresh,
             icon: const Icon(Icons.refresh),
             tooltip: 'Yangilash',
-          )
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ));
+            },
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Sozlamalar',
+          ),
         ],
       ),
       body: _loading
@@ -73,22 +86,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           : ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          _MetricCard(
+          _RingTile(
             title: 'Ekran vaqti',
-            value: _formatDuration(_screenTime),
             subtitle: 'Bugun qancha vaqt telefonda',
+            valueText: _formatDuration(_screenTime),
+            progress: (_screenTime.inMinutes / (3 * 60)).clamp(0.0, 1.0),
+            color: Theme.of(context).colorScheme.primary,
             icon: Icons.phone_android,
           ),
-          _MetricCard(
+          _RingTile(
             title: 'Bosilgan masofa',
-            value: '${NumberFormat.compact().format(_meters)} m',
             subtitle: 'Bugun yurgan masofa',
+            valueText: '${NumberFormat.compact().format(_meters / 1000)} km',
+            progress: ((_meters / 1000) / 6.0).clamp(0.0, 1.0),
+            color: Colors.green,
             icon: Icons.directions_walk,
           ),
-          _MetricCard(
+          _RingTile(
             title: 'Uyqu vaqti',
-            value: _formatDuration(_sleep),
             subtitle: 'Kecha taxminiy uyqu',
+            valueText: _formatDuration(_sleep),
+            progress: (_sleep.inMinutes / (8 * 60)).clamp(0.0, 1.0),
+            color: Colors.purple,
             icon: Icons.nightlight_round,
           ),
           const SizedBox(height: 8),
@@ -100,6 +119,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             },
             icon: const Icon(Icons.tips_and_updates_outlined),
             label: const Text('Tavsiyalar'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () {
+              final history = ref.read(historyServiceProvider).loadLastDays(7);
+              final screen = history.map((s) => (s?.screenTime.inMinutes ?? 0) / 60.0).toList();
+              final dist = history.map((s) => (s?.distanceMeters ?? 0) / 1000.0).toList();
+              final sleep = history.map((s) => (s?.sleep.inMinutes ?? 0) / 60.0).toList();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => WeeklyScreen(
+                    screenHours: screen.length == 7 ? screen : List<double>.filled(7, 0),
+                    distanceKm: dist.length == 7 ? dist : List<double>.filled(7, 0),
+                    sleepHours: sleep.length == 7 ? sleep : List<double>.filled(7, 0),
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.bar_chart_outlined),
+            label: const Text('Haftalik graflar'),
           ),
         ],
       ),
@@ -133,6 +172,57 @@ class _MetricCard extends StatelessWidget {
         trailing: Text(
           value,
           style: Theme.of(context).textTheme.titleLarge,
+        ),
+      ),
+    );
+  }
+}
+
+class _RingTile extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String valueText;
+  final double progress;
+  final Color color;
+  final IconData icon;
+
+  const _RingTile({
+    required this.title,
+    required this.subtitle,
+    required this.valueText,
+    required this.progress,
+    required this.color,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Row(
+          children: [
+            ProgressRing(progress: progress, size: 64, stroke: 8, color: color),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(icon, size: 18),
+                      const SizedBox(width: 6),
+                      Text(title, style: Theme.of(context).textTheme.titleMedium),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+                ],
+              ),
+            ),
+            Text(valueText, style: Theme.of(context).textTheme.titleLarge),
+          ],
         ),
       ),
     );
