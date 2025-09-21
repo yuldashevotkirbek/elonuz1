@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers.dart';
 import '../tips/tips_screen.dart';
+import '../weekly/weekly_screen.dart';
+import '../settings/settings_screen.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -65,7 +67,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onPressed: _refresh,
             icon: const Icon(Icons.refresh),
             tooltip: 'Yangilash',
-          )
+          ),
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => const SettingsScreen(),
+              ));
+            },
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Sozlamalar',
+          ),
         ],
       ),
       body: _loading
@@ -100,6 +111,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             },
             icon: const Icon(Icons.tips_and_updates_outlined),
             label: const Text('Tavsiyalar'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (_) => WeeklyScreen(
+                  screenHours: List<double>.filled(7, _screenTime.inMinutes / 60.0 / 7.0),
+                  distanceKm: List<double>.filled(7, (_meters / 1000.0) / 7.0),
+                  sleepHours: List<double>.filled(7, _sleep.inMinutes / 60.0 / 7.0),
+                ),
+              ));
+            },
+            icon: const Icon(Icons.bar_chart_outlined),
+            label: const Text('Haftalik graflar'),
           ),
         ],
       ),

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'src/ui/home/home_screen.dart';
+import 'src/notifications/notification_service.dart';
+import 'src/services/auto_persist.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -31,6 +33,9 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // kick off background helpers lazily when app starts
+    ref.read(notificationServiceProvider).initialize();
+    ref.read(autoPersistProvider).start();
     return MaterialApp(
       title: 'TEKSHIRUVCHI',
       debugShowCheckedModeBanner: false,
