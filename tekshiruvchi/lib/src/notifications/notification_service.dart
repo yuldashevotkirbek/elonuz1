@@ -51,15 +51,13 @@ class NotificationService {
       scheduled = scheduled.add(const Duration(days: 1));
     }
     await _plugin.zonedSchedule(
-      2,
-      'Kunlik eslatma',
-      'Bugungi natijalarni ko‘rib chiqing va sog‘lom odatlar qiling',
-      scheduled,
-      const NotificationDetails(android: android),
-      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-      matchDateTimeComponents: DateTimeComponents.time,
-    );
+        2,
+        'Kunlik eslatma',
+        'Bugungi natijalarni ko‘rib chiqing va sog‘lom odatlar qiling',
+        scheduled,
+        const NotificationDetails(android: android),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        matchDateTimeComponents: DateTimeComponents.time);
   }
 
   Future<void> cancelDailyReminder() async {

@@ -5,6 +5,7 @@ import '../../providers.dart';
 import '../tips/tips_screen.dart';
 import '../weekly/weekly_screen.dart';
 import '../settings/settings_screen.dart';
+import '../../services/history_service.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -115,13 +116,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(height: 8),
           OutlinedButton.icon(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (_) => WeeklyScreen(
-                  screenHours: List<double>.filled(7, _screenTime.inMinutes / 60.0 / 7.0),
-                  distanceKm: List<double>.filled(7, (_meters / 1000.0) / 7.0),
-                  sleepHours: List<double>.filled(7, _sleep.inMinutes / 60.0 / 7.0),
+              final history = ref.read(historyServiceProvider).loadLastDays(7);
+              final screen = history.map((s) => (s?.screenTime.inMinutes ?? 0) / 60.0).toList();
+              final dist = history.map((s) => (s?.distanceMeters ?? 0) / 1000.0).toList();
+              final sleep = history.map((s) => (s?.sleep.inMinutes ?? 0) / 60.0).toList();
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => WeeklyScreen(
+                    screenHours: screen.length == 7 ? screen : List<double>.filled(7, 0),
+                    distanceKm: dist.length == 7 ? dist : List<double>.filled(7, 0),
+                    sleepHours: sleep.length == 7 ? sleep : List<double>.filled(7, 0),
+                  ),
                 ),
-              ));
+              );
             },
             icon: const Icon(Icons.bar_chart_outlined),
             label: const Text('Haftalik graflar'),
